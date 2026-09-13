@@ -23,7 +23,6 @@
 
 ### 1. Клонирование репозитория
 
-
 ```bash
 git clone <url-репозитория>
 cd bulletin_board
