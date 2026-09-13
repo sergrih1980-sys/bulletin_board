@@ -1,0 +1,28 @@
+[project]
+name = "bulletin-board"
+version = "0.1.0"
+description = "Доска объявлений — backend на Django/DRF"
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+
+authors = [
+  { name = "sergrih1980-sys", email = "sergrih1980@gmail.com" }
+]
+
+[tool.poetry.dependencies]
+django = "^6.1"
+djangorestframework = "^3.14"
+djangorestframework-simplejwt = "^5.0"
+django-cors-headers = "^4.4"
+drf-spectacular = "^0.29"
+django-filter = "*"
+psycopg2-binary = "^2.9"
+Pillow = "^10.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-django = "^4.9"
+factory-boy = "^3.3"
+
+[tool.poetry]
+package-mode = false
