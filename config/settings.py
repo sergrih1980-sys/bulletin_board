@@ -138,7 +138,8 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ===== Celery =====
-CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+CELERY_BROKER_URL = f'redis://{os.environ.get("REDIS_HOST", "localhost")}:6379/0'
+CELERY_RESULT_BACKEND = f'redis://{os.environ.get("REDIS_HOST", "localhost")}:6379/0'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = True

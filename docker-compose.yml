@@ -11,42 +11,23 @@ services:
     environment:
       - DEBUG=True
       - DJANGO_SECRET_KEY=dev-key-change-me
-      - POSTGRES_DB=bulletin_board
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=db
       - REDIS_HOST=redis
     depends_on:
-      - db
       - redis
+      - worker
+      - beat
 
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: bulletin_board
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7
-
-  celery:
+  worker:
     build: .
+    # --pool=solo обязателен на Windows, чтобы не было PermissionError/OSError
     command: poetry run celery -A config worker -l info --pool=solo
     volumes:
       - .:/app
     environment:
       - DEBUG=False
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - POSTGRES_DB=bulletin_board
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=db
       - REDIS_HOST=redis
     depends_on:
-      - db
       - redis
 
   beat:
@@ -57,14 +38,12 @@ services:
     environment:
       - DEBUG=False
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - POSTGRES_DB=bulletin_board
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=db
       - REDIS_HOST=redis
     depends_on:
-      - db
       - redis
 
-volumes:
-  pgdata:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

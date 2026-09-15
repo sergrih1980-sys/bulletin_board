@@ -1,37 +1,27 @@
-# Bulletin Board API
+# Bulletin Board — Доска объявлений
 
-Доска объявлений с REST API на Django REST Framework. Проект включает авторизацию через JWT, CRUD для объявлений, фильтрацию, поиск и автоматическую документацию (Swagger).
+Backend-проект на **Django + Django REST Framework** с Celery, Redis и Poetry.  
+Позволяет публиковать, просматривать и управлять объявлениями; поддерживает периодические задачи (например, автоматическую деактивацию старых объявлений).
 
-## Стек технологий
+## 📋 Возможности
 
-- **Python 3.12+**
-- **Django 5.0+**
-- **Django REST Framework**
-- **Simple JWT** (авторизация)
-- **Django Filters** (фильтрация запросов)
-- **DRF Spectacular** (автоматическая документация Swagger)
-- **Poetry** (управление зависимостями и виртуальными окружениями)
-- **SQLite** (база данных для разработки)
+- CRUD объявлений (создание, просмотр, редактирование, удаление)
+- Авторизация и регистрация пользователей (JWT)
+- Фильтрация и пагинация API
+- Периодическая задача: автоматическая деактивация старых объявлений (`ads.tasks.deactivate_old_ads`)
+- Покрытие тестами — цель ~80%
 
-## Требования
+---
 
-- Python 3.12 или 3.13
-- Poetry (`pip install poetry` или официальный установщик)
-- Pillow (для работы с изображениями)
+## 🚀 Быстрый старт
 
-## Установка и запуск
+### Вариант 1: Запуск в Docker (рекомендуется)
 
-### 1. Клонирование репозитория
+**Требования:** Docker Desktop / Docker Engine, Docker Compose.
 
 ```bash
-git clone <url-репозитория>
-cd bulletin_board
+# Перейти в корень проекта
+cd C:\Users\user\my_prj\bulletin_board
 
-## Запуск локально (без Docker)
-
-```bash
-poetry install
-cp .env.example .env
-poetry run python manage.py migrate
-poetry run python manage.py createsuperuser
-poetry run python manage.py runserver
+# Собрать и запустить контейнеры
+docker compose up --build
