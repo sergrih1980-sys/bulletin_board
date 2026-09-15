@@ -18,6 +18,10 @@ drf-spectacular = "^0.29"
 django-filter = "*"
 psycopg2-binary = "^2.9"
 Pillow = "^10.0"
+dj-rest-auth = "^7.2.0"
+drf-nested-routers = "^0.95.3"
+celery = "^5.6.3"
+redis = "^8.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"

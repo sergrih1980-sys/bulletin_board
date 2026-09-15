@@ -26,3 +26,12 @@
 ```bash
 git clone <url-репозитория>
 cd bulletin_board
+
+## Запуск локально (без Docker)
+
+```bash
+poetry install
+cp .env.example .env
+poetry run python manage.py migrate
+poetry run python manage.py createsuperuser
+poetry run python manage.py runserver
