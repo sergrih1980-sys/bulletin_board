@@ -54,23 +54,23 @@ TEMPLATES = [
 ]
 
 # ===== DATABASE (Postgres) =====
-#DATABASES = {
-   #'default': {
-       #'ENGINE': 'django.db.backends.postgresql',
-        #'NAME': os.environ.get('POSTGRES_DB', 'bulletin_board'),
-       #'USER': os.environ.get('POSTGRES_USER', 'postgres'),
-       #'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
-        #'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
-        #'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-    #}
-#}
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB", "bulletin_board"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        "HOST": os.environ.get("POSTGRES_HOST", "db"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
+
+#DATABASES = {
+    #'default': {
+        #'ENGINE': 'django.db.backends.sqlite3',
+        #'NAME': BASE_DIR / 'db.sqlite3',
+    #}
+#}
 
 
 # ===== AUTH =====
@@ -84,9 +84,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 4,
     'DEFAULT_FILTER_BACKENDS': (
@@ -99,8 +96,9 @@ REST_FRAMEWORK = {
 
 # ===== JWT =====
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=int(os.environ.get('SIMPLE_JWT_ACCESS_TOKEN_LIFETIME_HOURS', 1))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'SIGNING_KEY': os.environ.get('SIMPLE_JWT_SIGNING_KEY', 'dev-secret-key'),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -123,8 +121,6 @@ REST_AUTH = {
     'TOKEN_MODEL': None,
 }
 
-STATIC_URL = 'static/'
-
 # ===== URL =====
 ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'
@@ -143,3 +139,15 @@ CELERY_BROKER_URL = f'redis://{os.environ.get("REDIS_HOST", "localhost")}:6379/0
 CELERY_RESULT_BACKEND = f'redis://{os.environ.get("REDIS_HOST", "localhost")}:6379/0'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_ENABLE_UTC = True
+
+PASSWORD_RESET_CONFIRM_URL = "password-reset-confirm/{uid}/{token}"
+PASSWORD_RESET_URL = "reset-password/{uid}/{token}"
+
+
+# Медиа-файлы (аватарки, изображения объявлений)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Статика (если ещё не настроена)
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")

@@ -1,44 +1,53 @@
 from rest_framework import viewsets, permissions
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
 from .models import Ad, Review
-from .serializers import AdSerializer, AdDetailSerializer, ReviewSerializer
-from .permissions import IsOwnerOrAdmin
+from .serializers import AdSerializer, ReviewSerializer
+from .permissions import IsAdminOrOwner
 
 
 class AdViewSet(viewsets.ModelViewSet):
-    queryset = Ad.objects.all()
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['title']
-    filterset_fields = ['is_active']
+    queryset = Ad.objects.filter(is_active=True)
+    serializer_class = AdSerializer
 
-    def get_serializer_class(self):
+    def get_permissions(self):
+        """
+        Аноним:      только list (список объявлений)
+        Авторизованный: list, retrieve, create
+        Админ/Владелец: update, partial_update, destroy
+        """
+        if self.action == 'list':
+            return [permissions.AllowAny()]
+
         if self.action == 'retrieve':
-            return AdDetailSerializer
-        return AdSerializer
+            return [permissions.IsAuthenticated()]
+
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+
+        # update, partial_update, destroy
+        return [IsAdminOrOwner()]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def get_permissions(self):
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return [IsOwnerOrAdmin()]
-        return [permissions.IsAuthenticatedOrReadOnly()]
-
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Review.objects.filter(ad_id=self.kwargs.get('ad_pk'))
-
-    def perform_create(self, serializer):
-        ad = Ad.objects.get(pk=self.kwargs.get('ad_pk'))
-        serializer.save(author=self.request.user, ad=ad)
 
     def get_permissions(self):
-        if self.action in ['update', 'partial_update', 'destroy']:
-            return [IsOwnerOrAdmin()]
-        return [permissions.IsAuthenticated()]
+        """
+        Аноним:      list, retrieve (отзывы можно читать всем)
+        Авторизованный: create
+        Админ/Владелец: update, partial_update, destroy
+        """
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+
+        if self.action == 'create':
+            return [permissions.IsAuthenticated()]
+
+        # update, partial_update, destroy
+        return [IsAdminOrOwner()]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
