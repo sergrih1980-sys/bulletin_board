@@ -1,26 +1,65 @@
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, UserCreateSerializer
+from .serializers import (
+    UserSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
+)
 
-User = get_user_model()
 
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    def get_object(self):
+        return self.request.user
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return UserCreateSerializer
-        return UserSerializer
+    def put(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data.pop('is_staff', None)
+        data.pop('is_superuser', None)
 
-    def get_permissions(self):
-        if self.action in ['create', 'retrieve', 'list']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
-    def me(self, request):
-        serializer = self.get_serializer(request.user)
+        obj = self.get_object()
+        serializer = self.get_serializer(obj, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
         return Response(serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        data = request.data.copy()
+        data.pop('is_staff', None)
+        data.pop('is_superuser', None)
+
+        obj = self.get_object()
+        serializer = self.get_serializer(obj, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class PasswordResetView(generics.GenericAPIView):
+    """POST /api/users/reset_password/ — отправка письма со ссылкой."""
+    serializer_class = PasswordResetRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"detail": "Если такой email существует, письмо для сброса было отправлено."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(generics.GenericAPIView):
+    """POST /api/users/reset_password_confirm/ — установка нового пароля."""
+    serializer_class = PasswordResetConfirmSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"detail": "Пароль успешно сброшен."},
+            status=status.HTTP_200_OK,
+        )
