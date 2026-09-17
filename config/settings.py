@@ -108,7 +108,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # ===== Email (для восстановления пароля) =====
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # для разработки
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Для прод: SMTP настройки через .env
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
