@@ -4,32 +4,36 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from django.conf import settings
 from django.conf.urls.static import static
 
 from ads.views import AdViewSet, ReviewViewSet
-from users.views import UserProfileView  # Импортируем только профиль
+from users.views import UserViewSet, UserProfileView
 
 router = DefaultRouter()
 router.register(r'ads', AdViewSet, basename='ad')
 router.register(r'reviews', ReviewViewSet, basename='review')
-# УБРАЛИ: router.register(r'users', UserViewSet, ...)
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # API
     path('api/', include(router.urls)),
+    path('api/users/', include('users.urls')),
 
-    # Личный профиль: только текущий пользователь, менять роли нельзя
     path('api/profile/', UserProfileView.as_view(), name='profile'),
 
-    # JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
 ]
 
 if settings.DEBUG:
