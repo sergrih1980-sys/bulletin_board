@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status, viewsets
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
@@ -41,6 +42,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class PasswordResetView(generics.GenericAPIView):
     serializer_class = PasswordResetRequestSerializer
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -54,6 +56,8 @@ class PasswordResetView(generics.GenericAPIView):
 
 class PasswordResetConfirmView(generics.GenericAPIView):
     serializer_class = PasswordResetConfirmSerializer
+    permission_classes = [permissions.AllowAny]
+
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -71,13 +75,26 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
+        # Разрешаем регистрацию любому (даже не авторизованному)
         if self.action == 'create':
             return [permissions.AllowAny()]
-        if self.action == 'list':
+
+        # Список пользователей и удаление могут делать только админы
+        if self.action in ['list', 'destroy']:
             return [permissions.IsAdminUser()]
+
+        # Остальные действия (retrieve, update, partial_update) — только для авторизованных
         return [permissions.IsAuthenticated()]
 
     def perform_destroy(self, instance):
         if instance.is_superuser:
             raise PermissionDenied("Нельзя удалить суперпользователя.")
         instance.delete()
+
+class CurrentUserView(RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Возвращаем текущего пользователя вместо поиска по ID
+        return self.request.user

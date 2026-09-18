@@ -1,10 +1,16 @@
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MinLengthValidator
 
 
 class Ad(models.Model):
-    title = models.CharField(max_length=255)
-    price = models.IntegerField()
+    title = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(1, "Заголовок не может быть пустым.")]
+    )
+    price = models.IntegerField(
+        validators=[MinValueValidator(0)]
+    )
     description = models.TextField()
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
